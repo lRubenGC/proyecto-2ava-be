@@ -39,6 +39,7 @@ security:
     access_control:
         - { path: ^/api, roles: ROLE_USER }
         - { path: ^/login_check, roles: PUBLIC_ACCESS }
+        - { path: ^/user, roles: PUBLIC_ACCESS }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
