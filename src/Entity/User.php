@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -31,6 +32,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 100)]
     private ?string $email = null;
+
+    #[ORM\ManyToMany(targetEntity: Car::class)]
+    private Collection $Car;
+
+    public function __construct()
+    {
+        $this->Car = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -119,5 +128,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username=$content["username"];
         $this->password=$content["password"];
         $this->email=$content["email"];
+    }
+
+    /**
+     * @return Collection<int, Car>
+     */
+    public function getCar(): Collection
+    {
+        return $this->Car;
+    }
+
+    public function addCar(Car $car): self
+    {
+        if (!$this->Car->contains($car)) {
+            $this->Car->add($car);
+        }
+
+        return $this;
+    }
+
+    public function removeCar(Car $car): self
+    {
+        $this->Car->removeElement($car);
+
+        return $this;
     }
 }
