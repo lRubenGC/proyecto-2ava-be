@@ -20,8 +20,21 @@ class UserController extends AbstractController
     #[Route('/register', name: 'new_contact', methods: ['POST'])]
     public function userRegister(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
-        $user = new User();
         $content = $request->getContent();
+        $userData = json_decode($content, true);
+
+        $existingUser = $entityManager->getRepository(User::class)
+            ->findOneBy(['username' => $userData["username"]]);
+        if ($existingUser) {
+            $response = [
+                'ok' => false,
+                'message' => 'Username: '.$userData["username"].' already in use'
+            ];
+            return new JsonResponse($response, 400);
+        }
+
+        $user = new User();
+
         $user->fromJson($content);
         $user->setPassword(
             $userPasswordHasher->hashPassword(
@@ -70,29 +83,29 @@ class UserController extends AbstractController
         return new JsonResponse($response);
     }
 
-    #[Route('/modify/{id}', name: 'update_user', methods: ['PUT'])]
-    public function updateUser(Request $request, int $id, EntityManagerInterface $entityManager): Response
-    {
-        $user = $entityManager->getRepository(User::class)->find($id);
+    // #[Route('/modify/{id}', name: 'update_user', methods: ['PUT'])]
+    // public function updateUser(Request $request, int $id, EntityManagerInterface $entityManager): Response
+    // {
+    //     $user = $entityManager->getRepository(User::class)->find($id);
 
-        if (!$user) {
-            $response = [
-                'ok' => false,
-                'message' => "User not found",
-            ];
-            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
-        }
+    //     if (!$user) {
+    //         $response = [
+    //             'ok' => false,
+    //             'message' => "User not found",
+    //         ];
+    //         return new JsonResponse($response, Response::HTTP_NOT_FOUND);
+    //     }
 
-        $content = $request->getContent();
-        $user->fromJson($content);
+    //     $content = $request->getContent();
+    //     $user->fromJson($content);
 
-        $entityManager->persist($user);
-        $entityManager->flush();
+    //     $entityManager->persist($user);
+    //     $entityManager->flush();
 
-        $response = [
-            'ok' => true,
-            'message' => "User updated",
-        ];
-        return new JsonResponse($response);
-    }
+    //     $response = [
+    //         'ok' => true,
+    //         'message' => "User updated",
+    //     ];
+    //     return new JsonResponse($response);
+    // }
 }
