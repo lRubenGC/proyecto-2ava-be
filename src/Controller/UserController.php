@@ -61,6 +61,23 @@ class UserController extends AbstractController
         return new JsonResponse($response);
     }
 
+    #[Route('/getUserId', name: 'get_contact', methods: ['POST'])]
+    public function getUserId(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $content = $request->getContent();
+        $username = json_decode($content, true);
+
+        $userRepository = $entityManager->getRepository(User::class);
+        $user = $userRepository->findOneBy(['username' => $username]);
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $userId = $user->getId();
+        return new JsonResponse($userId);
+    }
+
     // #[Route('/delete/{id}', name: 'delete_user', methods: ['DELETE'])]
     // public function deleteUser(int $id, EntityManagerInterface $entityManager): Response
     // {
